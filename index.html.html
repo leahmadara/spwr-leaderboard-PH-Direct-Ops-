@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Coordinator Performance Leaderboard — Direct Operations · SunPower</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1a1a1a;background:#f5f5f5;font-size:13px;}
+.page-wrap{max-width:1200px;margin:0 auto;padding:1.5rem 1rem;}
+.sunpower-bar{background:linear-gradient(90deg,#f97316,#1a56a0);height:4px;border-radius:2px;margin-bottom:1.5rem;}
+.page-header{background:#fff;border-radius:10px;border:1px solid #e0e0e0;padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;}
+.page-title{font-size:18px;font-weight:600;color:#0a1628;}
+.page-subtitle{font-size:12px;color:#666;margin-top:3px;}
+.period-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.period-btn{font-size:12px;padding:5px 14px;border:1px solid #ccc;border-radius:5px;cursor:pointer;background:#fff;color:#555;}
+.period-btn.active{background:#1a56a0;color:#fff;border-color:#1a56a0;font-weight:500;}
+
+/* ── WEEK SELECTOR BAR ─────────────────────────────────────────── */
+.week-bar{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:10px 1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.week-nav-btn{width:28px;height:28px;border:1px solid #ccc;border-radius:5px;cursor:pointer;background:#fff;color:#555;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.week-nav-btn:hover{background:#f0f4fa;border-color:#1a56a0;color:#1a56a0;}
+.week-nav-btn:disabled{opacity:.35;cursor:not-allowed;}
+.week-selector{font-size:12px;padding:5px 10px;border:1px solid #ccc;border-radius:5px;background:#fff;color:#1a1a1a;cursor:pointer;min-width:200px;}
+.week-selector:focus{outline:none;border-color:#1a56a0;}
+.week-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:12px;background:#f0f4fa;color:#1a56a0;border:1px solid #c7d7f0;white-space:nowrap;}
+.week-badge.current-ww{background:#d1fae5;color:#065f46;border-color:#a7f3d0;}
+.week-chip{font-size:10px;color:#aaa;white-space:nowrap;}
+
+.wd-bar{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:10px 1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.wd-chip{background:#f0f4fa;border:1px solid #d0daea;border-radius:5px;padding:4px 10px;font-size:11px;color:#555;}
+.wd-chip strong{color:#1a1a1a;}
+.data-bar{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:10px 1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.btn-export{padding:6px 14px;background:#059669;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:500;}
+.btn-export:hover{background:#047857;}
+.btn-import{padding:6px 14px;background:#1a56a0;color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;}
+.btn-import:hover{background:#134480;}
+.btn-clear{padding:6px 14px;background:#f5f5f5;color:#666;border:1px solid #ccc;border-radius:5px;cursor:pointer;font-size:12px;}
+.btn-clear:hover{background:#fee2e2;color:#991b1b;}
+.import-status{font-size:11px;padding:4px 10px;border-radius:4px;display:none;}
+.import-ok{background:#d1fae5;color:#065f46;}.import-err{background:#fee2e2;color:#991b1b;}
+.card{background:#fff;border-radius:10px;border:1px solid #e0e0e0;padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.tabs{display:flex;gap:2px;border-bottom:2px solid #e8e8e8;margin-bottom:1.25rem;}
+.tab{padding:8px 18px;cursor:pointer;font-size:13px;color:#666;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;border-radius:4px 4px 0 0;}
+.tab.active{color:#1a56a0;border-bottom:3px solid #1a56a0;font-weight:500;background:#f0f4fa;}
+.tab:hover:not(.active){color:#333;background:#f9f9f9;}
+.fn-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:1rem;}
+.e-tab{font-size:12px;padding:5px 13px;border:1px solid #ccc;border-radius:5px;cursor:pointer;background:#fff;color:#555;}
+.e-tab.active{background:#1a56a0;color:#fff;border-color:#1a56a0;}
+.fn-label{font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;display:inline-block;white-space:nowrap;}
+.fn-Funding{background:#dbeafe;color:#1e40af;}.fn-Licensing{background:#ede9fe;color:#4c1d95;}
+.fn-Permitting{background:#d1fae5;color:#065f46;}.fn-HOA{background:#fef3c7;color:#78350f;}
+.fn-Utilities{background:#ccfbf1;color:#134e4a;}.fn-Safety{background:#fee2e2;color:#991b1b;}
+.fn-Roofing{background:#fce7f3;color:#831843;}
+.badge{font-size:10px;padding:1px 6px;border-radius:3px;border:1px solid #ddd;background:#f5f5f5;color:#666;white-space:nowrap;}
+.badge-sup{background:#fef3c7;color:#92400e;border-color:#fcd34d;}
+.badge-ncg{background:#dbeafe;color:#1e40af;border-color:#93c5fd;}
+.badge-trainee{background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;}
+.note-box{background:#f0f4fa;border:1px solid #c7d7f0;border-radius:7px;padding:10px 14px;font-size:11px;color:#444;margin-bottom:1rem;line-height:1.7;}
+.toggle-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:9px 14px;background:#f9f9f9;border:1px solid #e8e8e8;border-radius:7px;margin-bottom:1rem;}
+.toggle-item{display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;}
+.toggle-item input{cursor:pointer;width:13px;height:13px;}
+.toggle-item.mon{color:#1a1a1a;font-weight:500;}
+.toggle-item.moff{color:#aaa;}
+.weight-pill{font-size:10px;padding:1px 6px;border-radius:8px;margin-left:2px;font-weight:500;}
+.wp-on{background:#dbeafe;color:#1e40af;}.wp-off{background:#f5f5f5;color:#aaa;}
+.coord-card{border:1px solid #e0e0e0;border-radius:10px;margin-bottom:1rem;overflow:hidden;background:#fff;}
+.coord-card-hdr{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#f9f9f9;flex-wrap:wrap;border-bottom:1px solid #f0f0f0;}
+.coord-card-body{padding:12px 14px;display:grid;gap:12px;}
+.output-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.day-cell{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.day-lbl{font-size:10px;font-weight:600;text-align:center;color:#666;}
+.day-lbl.today{color:#1a56a0;}.day-lbl.past{color:#059669;}.day-lbl.locked{color:#ccc;}
+.day-lbl.future-ww{color:#ccc;}
+.metric-input{width:100%;padding:3px 5px;border:1px solid #ccc;border-radius:4px;font-size:11px;background:#fff;color:#1a1a1a;text-align:center;}
+.metric-input:focus{outline:none;border-color:#1a56a0;box-shadow:0 0 0 2px rgba(26,86,160,.1);}
+.metric-input.locked{background:#f5f5f5;color:#bbb;cursor:not-allowed;border-style:dashed;pointer-events:none;}
+.metric-input.tfield{background:#f0f6ff;border-color:#93c5fd;color:#555;}
+.metric-input.moff{background:#f9f9f9;color:#bbb;border-style:dashed;opacity:.7;}
+.attend-grid{display:flex;gap:12px;flex-wrap:wrap;}
+.attend-day{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:#666;}
+.attend-day input{width:16px;height:16px;cursor:pointer;}
+.attend-day.lkd{opacity:.35;pointer-events:none;}
+.score-badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;}
+.sb-g{background:#d1fae5;color:#065f46;}.sb-b{background:#dbeafe;color:#1e40af;}
+.sb-a{background:#fef3c7;color:#78350f;}.sb-r{background:#fee2e2;color:#991b1b;}.sb-p{background:#ede9fe;color:#4c1d95;}
+.over-badge{font-size:9px;background:#ede9fe;color:#4c1d95;padding:1px 4px;border-radius:3px;margin-left:3px;}
+.chip-na{font-size:10px;background:#f5f5f5;color:#aaa;padding:1px 5px;border-radius:3px;border:1px solid #eee;}
+.chip-off{font-size:10px;background:#f5f5f5;color:#aaa;padding:1px 5px;border-radius:3px;border:1px dashed #ccc;}
+.mlabel{font-size:10px;font-weight:600;color:#555;margin-bottom:4px;}
+.mlabel.off{opacity:.4;text-decoration:line-through;}
+.coord-metric-toggles{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding:5px 8px;background:#f9f9f9;border:1px solid #eee;border-radius:6px;}
+.coord-metric-toggles-label{font-size:9px;font-weight:600;color:#aaa;margin-right:2px;white-space:nowrap;}
+.metric-pill{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:500;padding:2px 8px;border-radius:12px;cursor:pointer;border:1px solid transparent;transition:all .15s;user-select:none;white-space:nowrap;}
+.metric-pill.pill-on{background:#dbeafe;color:#1e40af;border-color:#93c5fd;}
+.metric-pill.pill-off{background:#f5f5f5;color:#aaa;border-color:#ddd;text-decoration:line-through;}
+.metric-pill input{display:none;}
+.overall-row{display:flex;align-items:center;gap:10px;padding:8px 14px;border-top:1px solid #f0f0f0;background:#fafbff;flex-wrap:wrap;}
+.prior-btn{display:flex;align-items:center;gap:5px;font-size:10px;color:#aaa;cursor:pointer;padding:6px 0 2px;background:none;border:none;width:100%;text-align:left;}
+.prior-btn:hover{color:#666;}
+.prior-arrow{font-size:9px;transition:transform .2s;display:inline-block;}
+.prior-section{display:none;padding:8px 0 4px;}
+.prior-section.open{display:block;}
+.prior-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;}
+.prior-field{display:flex;flex-direction:column;gap:3px;}
+.prior-field label{font-size:9px;color:#aaa;font-weight:500;}
+.lb-table{width:100%;border-collapse:collapse;font-size:12px;}
+.lb-table th{font-size:10px;font-weight:600;color:#666;padding:7px 9px;border-bottom:2px solid #e8e8e8;text-align:left;white-space:nowrap;cursor:pointer;background:#fafafa;}
+.lb-table th.ns{cursor:default;}
+.lb-table th:hover:not(.ns){color:#1a56a0;background:#f0f4fa;}
+.lb-table td{padding:7px 9px;border-bottom:1px solid #f0f0f0;vertical-align:middle;}
+.lb-table tr:hover td{background:#fafbff;}
+.lb-table tr.top3 td{background:#fffdf0;}
+.rank-badge{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
+.r1{background:#fbbf24;color:#451a03;}.r2{background:#94a3b8;color:#0f172a;}.r3{background:#fb923c;color:#431407;}.rn{background:#f0f0f0;color:#666;}
+.score-bar-wrap{height:6px;background:#e8e8e8;border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;}
+.score-bar{height:100%;border-radius:3px;}
+.wt-table{width:100%;border-collapse:collapse;font-size:12px;}
+.wt-table th{font-size:10px;font-weight:600;color:#666;padding:7px 9px;border-bottom:2px solid #e8e8e8;text-align:left;background:#fafafa;}
+.wt-table td{padding:7px 9px;border-bottom:1px solid #f0f0f0;}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;align-items:center;}
+.filter-btn{font-size:11px;padding:4px 11px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#fff;color:#555;}
+.filter-btn.active{background:#1a56a0;color:#fff;border-color:#1a56a0;}
+.legend-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:1rem;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#555;}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.sec-div{font-size:12px;font-weight:600;color:#555;padding:6px 0 5px;border-bottom:1px solid #e8e8e8;margin-bottom:10px;margin-top:6px;}
+.btn-primary{padding:8px 20px;background:#1a56a0;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;}
+.btn-primary:hover{background:#134480;}
+.readonly-banner{background:#fef3c7;border:1px solid #fcd34d;border-radius:7px;padding:8px 14px;font-size:11px;color:#78350f;margin-bottom:1rem;display:none;}
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:#fff;border-radius:12px;padding:1.5rem;max-width:440px;width:90%;}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:8px;}
+.modal-body{font-size:12px;color:#555;margin-bottom:1.25rem;line-height:1.7;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;}
+.btn-mok{padding:7px 18px;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:500;}
+.btn-mcancel{padding:7px 18px;background:#f5f5f5;color:#555;border:1px solid #ccc;border-radius:5px;cursor:pointer;font-size:12px;}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<div class="sunpower-bar"></div>
+
+<!-- View Mode Banner -->
+<div id="view-mode-banner" style="display:none;background:#f0f4fa;border:1px solid #c7d7f0;border-radius:10px;padding:10px 1.5rem;margin-bottom:1rem;align-items:center;gap:10px;flex-wrap:wrap;">
+  <span style="font-size:13px;">👁 <strong>View Mode</strong> — Leaderboard is read-only. Data entry is disabled.</span>
+  <button onclick="setViewMode('edit')" style="margin-left:auto;font-size:12px;padding:5px 14px;border:1px solid #1a56a0;border-radius:5px;background:#1a56a0;color:#fff;cursor:pointer;font-weight:500;">✏️ Switch to Edit Mode</button>
+</div>
+<div class="page-header">
+  <div>
+    <div class="page-title">Project Coordinator Performance Leaderboard</div>
+    <div class="page-subtitle">Direct Operations · SunPower &nbsp;|&nbsp; <span id="last-updated">—</span> &nbsp;<span style="font-size:10px;color:#aaa;">Mountain Time (MT)</span></div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+    <button onclick="setViewMode(viewMode==='edit'?'view':'edit')" id="view-mode-toggle"
+      style="font-size:11px;padding:5px 12px;border:1px solid #ccc;border-radius:5px;cursor:pointer;background:#fff;color:#555;">
+      👁 View Mode
+    </button>
+  </div>
+  <div class="period-row">
+    <span style="font-size:11px;color:#666;">View period:</span>
+    <button class="period-btn active" onclick="setPeriod('daily',this)">Daily</button>
+    <button class="period-btn" onclick="setPeriod('wtd',this)">WTD</button>
+    <button class="period-btn" onclick="setPeriod('mtd',this)">MTD</button>
+    <button class="period-btn" onclick="setPeriod('qtd',this)">QTD</button>
+  </div>
+</div>
+
+<!-- ── WEEK SELECTOR ──────────────────────────────────────────────── -->
+<div class="week-bar">
+  <span style="font-size:11px;color:#666;font-weight:500;">Week:</span>
+  <div id="week-bar-actions" style="display:flex;align-items:center;gap:6px;">
+  <button class="week-nav-btn" id="btn-prev-ww" onclick="navigateWW(-1)" title="Previous week">◀</button>
+  <select class="week-selector" id="ww-selector" onchange="selectWW(parseInt(this.value))"></select>
+  <button class="week-nav-btn" id="btn-next-ww" onclick="navigateWW(1)" title="Next week">▶</button>
+  </div>
+  <span class="week-badge" id="ww-badge">—</span>
+  <span class="week-chip" id="ww-dates">—</span>
+  <span style="margin-left:auto;font-size:10px;color:#aaa;" id="ww-saved-status"></span>
+</div>
+
+<div class="wd-bar">
+  <span style="font-size:11px;color:#666;font-weight:500;">Working days elapsed (MT):</span>
+  <span class="wd-chip">Week: <strong id="wd-wtd">—</strong></span>
+  <span class="wd-chip">Month: <strong id="wd-mtd">—</strong></span>
+  <span class="wd-chip">Quarter: <strong id="wd-qtd">—</strong></span>
+  <span style="font-size:10px;color:#aaa;" id="fiscal-info"></span>
+</div>
+
+<div class="data-bar" id="data-bar">
+  <span style="font-size:11px;color:#666;font-weight:500;">Data:</span>
+  <button class="btn-export" onclick="exportData()">⬇ Export All Weeks</button>
+  <label class="btn-import" style="cursor:pointer;">⬆ Import
+    <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
+  </label>
+  <button class="btn-clear" onclick="confirmClear()">↺ Reset Week</button>
+  <span id="import-status" class="import-status"></span>
+  <span style="font-size:10px;color:#aaa;">All weeks saved in one JSON file</span>
+  <span style="font-size:10px;color:#059669;margin-left:4px;" id="autosave-indicator"></span>
+  <button onclick="clearAutoSave()" style="font-size:10px;padding:3px 10px;border:1px solid #e0e0e0;border-radius:4px;background:#fff;color:#aaa;cursor:pointer;" title="Clear auto-saved browser data">🗑 Clear auto-save</button>
+</div>
+
+<div id="readonly-banner" class="readonly-banner">
+  📖 You are viewing <strong id="readonly-ww-label">—</strong> (past week — read-only). Switch to the current week to enter data.
+</div>
+
+<div class="card">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('entry',this)" id="tab-entry-btn">📋 Data Entry</div>
+    <div class="tab" onclick="switchTab('leaderboard',this)">🏆 Leaderboard</div>
+    <div class="tab" onclick="switchTab('weights',this)">⚙️ Weight Config</div>
+  </div>
+
+  <div id="tab-entry">
+    <div class="note-box">
+      <strong>Output:</strong> Target &amp; Actual per day — past days and today editable, future locked 🔒. <strong>Past weeks</strong> are read-only (shown in amber banner above). <strong>Attendance:</strong> Checkbox per day. <strong>FPY:</strong> Cumulative Submitted &amp; Rejected. <strong>Call Answer Rate &amp; Supervisor Tasks:</strong> Single % for the period. Use <strong>metric pills</strong> to include/exclude individual metrics. <strong>Trainees</strong> default to Attendance + Supervisor Tasks only — enable other metrics via pills when ready.
+    </div>
+    <div class="fn-tabs" id="fn-tabs"></div>
+    <div class="toggle-bar" id="fn-toggles"></div>
+    <div id="entry-form"></div>
+    <div style="margin-top:1rem;display:flex;align-items:center;gap:12px;">
+      <button class="btn-primary" onclick="updateLeaderboard()">Update Leaderboard ↗</button>
+      <span style="font-size:11px;color:#999;">Weights auto-adjust instantly as you toggle</span>
+    </div>
+    <!-- Global hidden coordinators panel — shows all hidden across all functions -->
+    <div id="hidden-panel"></div>
+  </div>
+
+  <div id="tab-leaderboard" style="display:none;">
+    <div class="filter-row">
+      <span style="font-size:11px;color:#666;font-weight:500;">Filter:</span>
+      <button class="filter-btn active" onclick="filterFn('ALL',this)">All</button>
+      <button class="filter-btn" onclick="filterFn('Funding',this)">Funding</button>
+      <button class="filter-btn" onclick="filterFn('Licensing',this)">Licensing</button>
+      <button class="filter-btn" onclick="filterFn('Permitting',this)">Permitting</button>
+      <button class="filter-btn" onclick="filterFn('HOA',this)">HOA</button>
+      <button class="filter-btn" onclick="filterFn('Utilities',this)">Utilities</button>
+      <button class="filter-btn" onclick="filterFn('Safety',this)">Safety</button>
+      <button class="filter-btn" onclick="filterFn('Roofing',this)">Roofing</button>
+    </div>
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-dot" style="background:#7c3aed;"></div>Over Target (&gt;100%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#059669;"></div>Top Performer (≥90%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1a56a0;"></div>Meeting Target (75–89%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d97706;"></div>Needs Improvement (60–74%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dc2626;"></div>At Risk (&lt;60%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#9ca3af;"></div>Trainee</div>
+    </div>
+    <div style="overflow-x:auto;">
+    <table class="lb-table"><thead><tr>
+      <th class="ns" style="width:30px;">#</th>
+      <th onclick="sortBy('name')">Coordinator ⇅</th><th onclick="sortBy('fn')">Function ⇅</th>
+      <th onclick="sortBy('output')">Output ⇅</th><th onclick="sortBy('fpy')">FPY ⇅</th>
+      <th onclick="sortBy('call')">Call Answer Rate ⇅</th><th onclick="sortBy('attendance')">Attend. ⇅</th>
+      <th onclick="sortBy('supervisor')">Supv. ⇅</th><th onclick="sortBy('overall')">Overall ⇅</th>
+      <th class="ns">Bar</th>
+    </tr></thead><tbody id="lb-body"></tbody></table>
+    </div>
+  </div>
+
+  <div id="tab-weights" style="display:none;">
+    <div class="note-box">Live effective weights based on current toggle states. Always totals <strong>100%</strong>.</div>
+    <table class="wt-table"><thead><tr>
+      <th>Function</th><th>Output</th><th>FPY</th><th>Call Answer Rate</th><th>Attendance</th><th>Supervisor</th><th>Total</th>
+    </tr></thead><tbody id="wt-body"></tbody></table>
+  </div>
+</div>
+
+<div style="text-align:center;font-size:11px;color:#bbb;margin-top:1rem;">
+  Direct Operations · SunPower &nbsp;|&nbsp; Project Coordinator Performance Leaderboard v2.6 · Phase 1 &nbsp;|&nbsp; Timezone: Mountain Time (MT)
+</div>
+
+<div class="modal-overlay" id="clear-modal">
+  <div class="modal-box">
+    <div class="modal-title">Reset current week data?</div>
+    <div class="modal-body">This clears all data for <strong id="clear-ww-label">—</strong>. Export first if you want to keep it.</div>
+    <div class="modal-actions">
+      <button class="btn-mcancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-mok" style="background:#dc2626;" onclick="clearWeekData()">Reset</button>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+// ── MOUNTAIN TIME ─────────────────────────────────────────────────────
+const TZ='America/Denver';
+function getMTC(){
+  const p=new Intl.DateTimeFormat('en-US',{timeZone:TZ,year:'numeric',month:'numeric',day:'numeric',weekday:'short'}).formatToParts(new Date());
+  const g=t=>p.find(x=>x.type===t)?.value;
+  const dm={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6};
+  return{year:parseInt(g('year')),month:parseInt(g('month'))-1,day:parseInt(g('day')),dow:dm[g('weekday')]??1};
+}
+function getMTDate(){const{year,month,day}=getMTC();return new Date(year,month,day);}
+function fmtMT(){return new Date().toLocaleString('en-US',{timeZone:TZ,month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',timeZoneName:'short'});}
+
+// ── FISCAL / WW CALENDAR ──────────────────────────────────────────────
+// WW1 starts Dec 29, 2025 (fiscal Q1 start)
+const WW1_START = new Date(2025,11,29); // Dec 29 2025
+
+function getWWStartDate(ww){
+  const d=new Date(WW1_START);
+  d.setDate(d.getDate()+(ww-1)*7);
+  return d;
+}
+function getWWEndDate(ww){
+  const d=getWWStartDate(ww);
+  d.setDate(d.getDate()+4); // Friday
+  return d;
+}
+function getWWFromDate(date){
+  const ms=date.getTime()-WW1_START.getTime();
+  return Math.max(1,Math.min(52,Math.floor(ms/(7*24*3600*1000))+1));
+}
+function getWWLabel(ww){
+  return `WW${ww}`;
+}
+function getWWDateRange(ww){
+  const mon=getWWStartDate(ww);
+  const fri=getWWEndDate(ww);
+  const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  return `${fmt(mon)} – ${fmt(fri)}`;
+}
+function getQuarterFromWW(ww){
+  // Q1: WW1-WW13, Q2: WW14-WW26, Q3: WW27-WW39, Q4: WW40-WW52
+  if(ww<=13) return 1;
+  if(ww<=26) return 2;
+  if(ww<=39) return 3;
+  return 4;
+}
+function getWWWithinQuarter(ww){
+  return ((ww-1)%13)+1;
+}
+
+// ── DATE HELPERS FOR SELECTED WEEK ───────────────────────────────────
+const TODAY=getMTDate();
+const DOW_TODAY=getMTC().dow;
+const CURRENT_WW=getWWFromDate(TODAY);
+
+function getDayIdxForSelectedWW(ww){
+  // Returns 0-4 for Mon-Fri representing "today" relative to selected week
+  // If ww is current week: returns actual MT day index
+  // If ww is past: returns 4 (Friday = all days elapsed)
+  // If ww is future: returns -1 (no days elapsed)
+  if(ww<CURRENT_WW) return 4;
+  if(ww>CURRENT_WW) return -1;
+  if(DOW_TODAY===0||DOW_TODAY===6) return 4;
+  return DOW_TODAY-1;
+}
+function isLockedForWW(dayIdx,ww){
+  const todayIdx=getDayIdxForSelectedWW(ww);
+  return dayIdx>todayIdx;
+}
+function isReadonlyWW(ww){ return ww<CURRENT_WW; }
+function isFutureWW(ww){ return ww>CURRENT_WW; }
+
+function workingDaysBetween(s,e){
+  let c=0,d=new Date(s);d.setHours(0,0,0,0);
+  const en=new Date(e);en.setHours(0,0,0,0);
+  while(d<=en){if(d.getDay()!==0&&d.getDay()!==6)c++;d.setDate(d.getDate()+1);}
+  return c;
+}
+
+// ── ROSTER ────────────────────────────────────────────────────────────
+const COORDS=[
+  {code:'LTD',name:'Leo Miguel De Perio',fn:'Funding',ncg:false,isSup:false,isTrainee:false,dailyTarget:36,active:true},
+  {code:'MLA',name:'Mark Zeus Arevalo',fn:'Funding',ncg:false,isSup:false,isTrainee:false,dailyTarget:36,active:true},
+  {code:'NAM',name:'Nicole Malabanan',fn:'Funding',ncg:false,isSup:false,isTrainee:true,dailyTarget:null,active:true},
+  {code:'BRP',name:'Bernadel Roxas',fn:'Funding',ncg:false,isSup:false,isTrainee:true,dailyTarget:null,active:true},
+  {code:'SZC',name:'Shiela Cruzada',fn:'Licensing',ncg:false,isSup:false,isTrainee:false,dailyTarget:8,active:true},
+  {code:'RZG',name:'Rica Joy Gimpes',fn:'Permitting',ncg:false,isSup:false,isTrainee:false,dailyTarget:5.2,active:true},
+  {code:'SRC',name:'Sheryl Canlas',fn:'Permitting',ncg:false,isSup:false,isTrainee:false,dailyTarget:5.2,active:true},
+  {code:'KLS',name:'Kyla Sese',fn:'Permitting',ncg:true,isSup:false,isTrainee:false,dailyTarget:5.2,active:true},
+  {code:'RSG',name:'Romer Gerodias',fn:'Permitting',ncg:true,isSup:false,isTrainee:true,dailyTarget:null,active:true},
+  {code:'DVB',name:'Denmark Borce',fn:'Permitting',ncg:true,isSup:false,isTrainee:true,dailyTarget:null,active:true},
+  {code:'LRS',name:'Lean Patrick Susano',fn:'Funding',ncg:true,isSup:false,isTrainee:true,dailyTarget:null,active:true},
+  {code:'JMV',name:'Jeremy Fridae Lee Macaranas',fn:'HOA',ncg:true,isSup:false,isTrainee:false,dailyTarget:2.5,active:true},
+  {code:'AQM',name:'Allaine Jemina Magpantay',fn:'Utilities',ncg:true,isSup:false,isTrainee:true,dailyTarget:null,active:true},
+  {code:'ENB',name:'Elijah May Balahadia',fn:'Utilities',ncg:true,isSup:false,isTrainee:true,dailyTarget:null,active:true},
+  {code:'DHF',name:'Danika Ysabel Fortuna',fn:'Utilities',ncg:true,isSup:false,isTrainee:true,dailyTarget:null,active:true},
+  {code:'VPR',name:'Viana Ramos',fn:'Utilities',ncg:true,isSup:false,isTrainee:false,dailyTarget:15,active:true},
+  {code:'GPG',name:'Andrey Gucila',fn:'Utilities',ncg:true,isSup:false,isTrainee:false,dailyTarget:15,active:true},
+  {code:'WZI',name:'Wilmer Ilagan',fn:'Utilities',ncg:true,isSup:false,isTrainee:false,dailyTarget:15,active:true},
+  {code:'KLA',name:'Kayecell Aclan',fn:'Utilities',ncg:false,isSup:false,isTrainee:false,dailyTarget:15,active:true},
+  {code:'AAB',name:'Alvin Buhay',fn:'Utilities',ncg:false,isSup:false,isTrainee:false,dailyTarget:15,active:true},
+  {code:'MMR',name:'Rochelle Reynante',fn:'Utilities',ncg:false,isSup:false,isTrainee:false,dailyTarget:15,active:true},
+  {code:'RCL',name:'Rico Lacadman',fn:'Safety',ncg:false,isSup:false,isTrainee:false,dailyTarget:8,active:true},
+  {code:'RSC',name:'Rona Carpena',fn:'Roofing',ncg:false,isSup:false,isTrainee:false,dailyTarget:10,active:true},
+];
+
+const FND={
+  Funding:{output:true,fpy:false,call:true,attendance:true,supervisor:true},
+  Licensing:{output:true,fpy:false,call:false,attendance:true,supervisor:true},
+  Permitting:{output:true,fpy:true,call:true,attendance:true,supervisor:true},
+  HOA:{output:true,fpy:false,call:true,attendance:true,supervisor:true},
+  Utilities:{output:true,fpy:false,call:true,attendance:true,supervisor:true},
+  Safety:{output:true,fpy:false,call:false,attendance:true,supervisor:true},
+  Roofing:{output:true,fpy:false,call:false,attendance:true,supervisor:true},
+};
+const BASE={output:30,fpy:30,call:20,attendance:10,supervisor:10};
+const METRICS=['output','fpy','call','attendance','supervisor'];
+const ML={output:'Output',fpy:'FPY',call:'Call Answer Rate',attendance:'Attendance',supervisor:'Supv. Tasks'};
+const FNS=[...new Set(COORDS.map(c=>c.fn))];
+const DAYS=['Mon','Tue','Wed','Thu','Fri'];
+
+// ── STATE ─────────────────────────────────────────────────────────────
+let cp='daily',cft='Funding',cf='ALL',cs='overall',csd=1;
+let selectedWW=CURRENT_WW;
+// View mode: 'edit' (default) or 'view' (read-only, hides data entry tab)
+const urlParams=new URLSearchParams(window.location.search);
+let viewMode=urlParams.get('mode')==='view'?'view':'edit';
+function setViewMode(mode){
+  viewMode=mode;
+  const banner=document.getElementById('view-mode-banner');
+  const tabEntry=document.getElementById('tab-entry-btn');
+  const dataBar=document.getElementById('data-bar');
+  const weekActions=document.getElementById('week-bar-actions');
+  const vmBtn=document.getElementById('view-mode-toggle');
+  if(banner) banner.style.display=mode==='view'?'flex':'none';
+  if(tabEntry) tabEntry.style.display=mode==='view'?'none':'inline-block';
+  if(dataBar) dataBar.style.display=mode==='view'?'none':'flex';
+  if(weekActions) weekActions.style.display=mode==='view'?'flex':'flex'; // always show week nav
+  if(vmBtn) vmBtn.textContent=mode==='view'?'✏️ Edit Mode':'👁 View Mode';
+  if(mode==='view'){
+    switchTab('leaderboard',document.querySelectorAll('.tab')[1]);
+  }
+}
+// Global active status — persists across weeks; false = hidden but data preserved
+const coordActive={};
+COORDS.forEach(c=>{coordActive[c.code]=true;});
+// Team reassignment: coordFn[code] overrides c.fn when set
+const coordFn={};
+function getCoordFn(code){
+  return coordFn[code]||COORDS.find(x=>x.code===code)?.fn||'';
+}
+function reassignCoord(code,newFn){
+  if(!newFn||newFn===COORDS.find(x=>x.code===code)?.fn){
+    delete coordFn[code]; // back to original
+  } else {
+    coordFn[code]=newFn;
+  }
+  buildFnTabs();buildToggles();buildForm();
+  if(document.getElementById('tab-leaderboard').style.display!=='none')renderLB();
+}
+function toggleCoordActive(code){
+  coordActive[code]=!coordActive[code];
+  buildForm();
+  buildHiddenPanel();
+  if(document.getElementById('tab-leaderboard').style.display!=='none')renderLB();
+}
+
+// Per-week data store: weekStore[ww] = {coordData, fnToggles}
+const weekStore={};
+
+// RSC ramp-up schedule: WW -> daily target
+const RSC_TARGETS={14:15,15:19,16:19,17:26,18:26,19:32,20:39,21:39,22:45,23:45,24:45,25:52,26:52};
+function getDailyTarget(code,ww){
+  if(code==='RSC'){
+    const keys=Object.keys(RSC_TARGETS).map(Number).sort((a,b)=>a-b);
+    let target=10;
+    for(const k of keys){if(ww>=k)target=RSC_TARGETS[k];}
+    return target;
+  }
+  const c=COORDS.find(x=>x.code===code);
+  return c?.dailyTarget||0;
+}
+function emptyCoordData(ww){
+  const w=ww||selectedWW||1;
+  const d={};
+  COORDS.forEach(c=>{
+    const dt=getDailyTarget(c.code,w);
+    const defaultOn=c.isTrainee
+      ?{output:false,fpy:false,call:false,attendance:true,supervisor:true}
+      :{output:true,fpy:true,call:true,attendance:true,supervisor:true};
+    d[c.code]={
+      targets:[dt,dt,dt,dt,dt],actuals:[0,0,0,0,0],
+      attendance:[false,false,false,false,false],
+      fpy_submitted:0,fpy_rejected:0,
+      call:0,supervisor:0,
+      mtd_target_override:null,mtd_actual_override:null,
+      qtd_target_override:null,qtd_actual_override:null,
+      on:{...defaultOn},
+    };
+  });
+  return d;
+}
+function emptyFnToggles(){
+  const t={};FNS.forEach(fn=>{t[fn]={...FND[fn]};});return t;
+}
+function getWeekStore(ww){
+  if(!weekStore[ww]) weekStore[ww]={coordData:emptyCoordData(ww),fnToggles:emptyFnToggles()};
+  return weekStore[ww];
+}
+
+// Active references (point to current selected week's store)
+function activeData(){ return getWeekStore(selectedWW).coordData; }
+function activeFnt(){ return getWeekStore(selectedWW).fnToggles; }
+
+// ── WW SELECTOR UI ────────────────────────────────────────────────────
+function buildWWSelector(){
+  const sel=document.getElementById('ww-selector');
+  sel.innerHTML='';
+  for(let ww=1;ww<=52;ww++){
+    const opt=document.createElement('option');
+    opt.value=ww;
+    const q=getQuarterFromWW(ww);
+    const qww=getWWWithinQuarter(ww);
+    opt.textContent=`WW${ww} — Q${q} W${qww} · ${getWWDateRange(ww)}`;
+    if(ww===CURRENT_WW) opt.textContent+=' ← current';
+    sel.appendChild(opt);
+  }
+  sel.value=selectedWW;
+}
+
+function updateWWUI(){
+  const sel=document.getElementById('ww-selector');
+  sel.value=selectedWW;
+  const isCurrent=selectedWW===CURRENT_WW;
+  const isPast=isReadonlyWW(selectedWW);
+  const isFuture=isFutureWW(selectedWW);
+  const badge=document.getElementById('ww-badge');
+  const q=getQuarterFromWW(selectedWW);
+  const qww=getWWWithinQuarter(selectedWW);
+  badge.textContent=`WW${selectedWW} · Q${q} W${qww}`;
+  badge.className=`week-badge${isCurrent?' current-ww':''}`;
+  document.getElementById('ww-dates').textContent=getWWDateRange(selectedWW);
+  document.getElementById('btn-prev-ww').disabled=selectedWW<=1;
+  document.getElementById('btn-next-ww').disabled=selectedWW>=52;
+
+  // Read-only banner
+  const banner=document.getElementById('readonly-banner');
+  if(isPast){
+    banner.style.display='block';
+    document.getElementById('readonly-ww-label').textContent=`WW${selectedWW} (${getWWDateRange(selectedWW)})`;
+  } else {
+    banner.style.display='none';
+  }
+
+  // Update working days for selected week
+  updateWDBar();
+}
+
+function navigateWW(delta){
+  const newWW=Math.max(1,Math.min(52,selectedWW+delta));
+  selectWW(newWW);
+}
+
+function selectWW(ww){
+  // Save current DOM state before switching
+  collectDOM();
+  selectedWW=ww;
+  updateWWUI();
+  buildToggles();
+  buildForm();
+  if(document.getElementById('tab-leaderboard').style.display!=='none') renderLB();
+}
+
+// ── WORKING DAYS BAR ──────────────────────────────────────────────────
+function updateWDBar(){
+  const wwMon=getWWStartDate(selectedWW);
+  const wwFri=getWWEndDate(selectedWW);
+  const todayIdx=getDayIdxForSelectedWW(selectedWW);
+
+  // WTD: days elapsed within this week
+  let wtd=0;
+  if(todayIdx>=0){
+    // Count Mon through today (or Fri for past weeks)
+    const endDay=new Date(wwMon);
+    endDay.setDate(wwMon.getDate()+Math.min(todayIdx,4));
+    wtd=workingDaysBetween(wwMon,endDay);
+  }
+
+  // MTD: working days from 1st of month containing Mon of this week, to last elapsed day
+  const refDate=todayIdx<0?new Date(wwMon):new Date(wwMon);
+  refDate.setDate(wwMon.getDate()+Math.min(Math.max(todayIdx,0),4));
+  const m1=new Date(refDate.getFullYear(),refDate.getMonth(),1);
+  const mtd=todayIdx<0?0:workingDaysBetween(m1,refDate);
+
+  // QTD: working days from Q start to last elapsed day
+  const q=getQuarterFromWW(selectedWW);
+  const qStartWW=(q-1)*13+1;
+  const qStart=getWWStartDate(qStartWW);
+  const qtd=todayIdx<0?0:workingDaysBetween(qStart,refDate);
+
+  document.getElementById('wd-wtd').textContent=wtd;
+  document.getElementById('wd-mtd').textContent=mtd;
+  document.getElementById('wd-qtd').textContent=qtd;
+  document.getElementById('fiscal-info').textContent=`Q${q} · WW${selectedWW} of WW52`;
+  document.getElementById('last-updated').textContent=fmtMT();
+}
+
+// ── WEIGHTS ───────────────────────────────────────────────────────────
+function getW(fn,isTrainee,code){
+  // All coordinators including trainees use the same weight engine
+  // Trainees just have output/fpy/call OFF by default in their per-coord 'on' store
+  const ft=activeFnt()[fn];
+  const ct=code?activeData()[code].on:{output:true,fpy:true,call:true,attendance:true,supervisor:true};
+  const act=METRICS.filter(m=>ft[m]&&ct[m]);
+  if(!act.length)return{output:null,fpy:null,call:null,attendance:null,supervisor:null};
+  const s=act.reduce((a,m)=>a+BASE[m],0),r={};
+  METRICS.forEach(m=>{r[m]=act.includes(m)?parseFloat(((BASE[m]/s)*100).toFixed(4)):null;});
+  return r;
+}
+
+// ── SCORES ────────────────────────────────────────────────────────────
+function getOS(code,period){
+  const d=activeData()[code];
+  const todayIdx=getDayIdxForSelectedWW(selectedWW);
+  const elapsed=Math.max(0,todayIdx)+1;
+  if(period==='daily'){
+    const i=Math.max(0,todayIdx);
+    const t=parseFloat(d.targets[i])||0,a=parseFloat(d.actuals[i])||0;
+    return t>0?parseFloat(Math.min((a/t)*100,1000).toFixed(1)):null;
+  }
+  let wT=0,wA=0;
+  for(let i=0;i<elapsed;i++){wT+=parseFloat(d.targets[i])||0;wA+=parseFloat(d.actuals[i])||0;}
+  if(period==='wtd') return wT>0?parseFloat(Math.min((wA/wT)*100,100).toFixed(1)):null;
+  if(period==='mtd'){
+    const t=d.mtd_target_override!==null?parseFloat(d.mtd_target_override):wT;
+    const a=d.mtd_actual_override!==null?parseFloat(d.mtd_actual_override):wA;
+    return t>0?parseFloat(Math.min((a/t)*100,1000).toFixed(1)):null;
+  }
+  const t=d.qtd_target_override!==null?parseFloat(d.qtd_target_override):wT;
+  const a=d.qtd_actual_override!==null?parseFloat(d.qtd_actual_override):wA;
+  return t>0?parseFloat(Math.min((a/t)*100,1000).toFixed(1)):null;
+}
+function getFPY(code){
+  const d=activeData()[code],s=parseFloat(d.fpy_submitted)||0,r=parseFloat(d.fpy_rejected)||0;
+  return s>0?parseFloat(Math.min(((s-r)/s)*100,100).toFixed(1)):null;
+}
+function getAtt(code,period){
+  const d=activeData()[code];
+  const todayIdx=getDayIdxForSelectedWW(selectedWW);
+  if(period==='daily') return d.attendance[Math.max(0,todayIdx)]?100:0;
+  // WTD: always divide by 5 (full work week) so 4/5 = 80% regardless of which day is today
+  // MTD/QTD: use total working days in the period as denominator
+  const presentCount=d.attendance.filter(Boolean).length; // all 5 days checked state
+  if(period==='wtd'){
+    return parseFloat(Math.min((presentCount/5)*100,100).toFixed(1));
+  }
+  // MTD/QTD: sum attendance days + scale by period working days
+  const wwStart=getWWStartDate(selectedWW);
+  const refDate=new Date(wwStart);refDate.setDate(wwStart.getDate()+4); // Friday of this week
+  if(period==='mtd'){
+    const m1=new Date(refDate.getFullYear(),refDate.getMonth(),1);
+    const totalDays=workingDaysBetween(m1,refDate);
+    return totalDays>0?parseFloat(Math.min((presentCount/totalDays)*100,100).toFixed(1)):0;
+  }
+  if(period==='qtd'){
+    const q=getQuarterFromWW(selectedWW);
+    const qStartWW=(q-1)*13+1;
+    const qStart=getWWStartDate(qStartWW);
+    const totalDays=workingDaysBetween(qStart,refDate);
+    return totalDays>0?parseFloat(Math.min((presentCount/totalDays)*100,100).toFixed(1)):0;
+  }
+  return 0;
+}
+function getCall(code){return parseFloat(Math.min(((parseFloat(activeData()[code].call)||0)/95)*100,100).toFixed(1));}
+function getOv(code,period){
+  const c=COORDS.find(x=>x.code===code),w=getW(getCoordFn(code),c.isTrainee,code);
+  const oS=getOS(code,period),fS=getFPY(code),aS=getAtt(code,period),cS=getCall(code),sS=parseFloat(activeData()[code].supervisor)||0;
+  let t=0;
+  if(w.output!==null&&oS!==null)t+=oS*(w.output/100);
+  if(w.fpy!==null&&fS!==null)t+=fS*(w.fpy/100);
+  if(w.call!==null)t+=cS*(w.call/100);
+  if(w.attendance!==null)t+=aS*(w.attendance/100);
+  if(w.supervisor!==null)t+=sS*(w.supervisor/100);
+  return parseFloat(t.toFixed(1));
+}
+function sc(v){if(v>100)return'#7c3aed';if(v>=90)return'#059669';if(v>=75)return'#1a56a0';if(v>=60)return'#d97706';return'#dc2626';}
+function sb(v){if(v>100)return'sb-p';if(v>=90)return'sb-g';if(v>=75)return'sb-b';if(v>=60)return'sb-a';return'sb-r';}
+
+// ── EXPORT / IMPORT ───────────────────────────────────────────────────
+function collectDOM(){
+  if(isReadonlyWW(selectedWW)||isFutureWW(selectedWW)) return;
+  const d=activeData();
+  COORDS.forEach(c=>{
+    for(let i=0;i<5;i++){
+      const t=document.getElementById(`tgt-${c.code}-${i}`),a=document.getElementById(`act-${c.code}-${i}`);
+      if(t&&!t.disabled) d[c.code].targets[i]=parseFloat(t.value)||0;
+      if(a&&!a.disabled) d[c.code].actuals[i]=parseFloat(a.value)||0;
+      const att=document.getElementById(`att-${c.code}-${i}`);
+      if(att&&!att.disabled) d[c.code].attendance[i]=att.checked;
+    }
+    ['call','supervisor'].forEach(m=>{const el=document.getElementById(`${m}-${c.code}`);if(el)d[c.code][m]=parseFloat(el.value)||0;});
+    const fs=document.getElementById(`fs-sub-${c.code}`),fr=document.getElementById(`fs-rej-${c.code}`);
+    if(fs)d[c.code].fpy_submitted=parseFloat(fs.value)||0;
+    if(fr)d[c.code].fpy_rejected=parseFloat(fr.value)||0;
+    const mt=document.getElementById(`mt-${c.code}`),ma=document.getElementById(`ma-${c.code}`);
+    const qt=document.getElementById(`qt-${c.code}`),qa=document.getElementById(`qa-${c.code}`);
+    if(mt)d[c.code].mtd_target_override=mt.value!==''?parseFloat(mt.value):null;
+    if(ma)d[c.code].mtd_actual_override=ma.value!==''?parseFloat(ma.value):null;
+    if(qt)d[c.code].qtd_target_override=qt.value!==''?parseFloat(qt.value):null;
+    if(qa)d[c.code].qtd_actual_override=qa.value!==''?parseFloat(qa.value):null;
+  });
+}
+
+function exportData(){
+  collectDOM();
+  const payload={version:'2.6',timezone:'America/Denver',exportedAt:fmtMT(),currentWW:selectedWW,coordActive:{...coordActive},coordFn:{...coordFn},weeks:{}};
+  Object.keys(weekStore).forEach(ww=>{
+    const ws=weekStore[ww];
+    payload.weeks[ww]={
+      coordData:JSON.parse(JSON.stringify(ws.coordData)),
+      fnToggles:JSON.parse(JSON.stringify(ws.fnToggles)),
+    };
+  });
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;
+  a.download=`SPWR-Leaderboard-WW${selectedWW}-${new Date().toLocaleDateString('en-CA',{timeZone:TZ})}.json`;
+  a.click();URL.revokeObjectURL(url);
+  showSt(`✓ Exported all weeks (WW${selectedWW} active)`,true);
+}
+
+function importData(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const p=JSON.parse(e.target.result);
+      if(!p.version)throw new Error('Invalid file');
+      // Support both old single-week format and new multi-week format
+      if(p.weeks){
+        // New multi-week format
+        Object.keys(p.weeks).forEach(ww=>{
+          const wwNum=parseInt(ww);
+          weekStore[wwNum]=p.weeks[ww];
+        });
+        if(p.currentWW) selectedWW=p.currentWW;
+      } else if(p.data){
+        // Old v2.5 single-week format — import into current week
+        const store=getWeekStore(CURRENT_WW);
+        COORDS.forEach(c=>{
+          const s=p.data[c.code];if(!s)return;
+          const dt=c.dailyTarget||0;
+          store.coordData[c.code].targets=[dt,dt,dt,dt,dt];
+          store.coordData[c.code].actuals=[0,0,0,0,0];
+          store.coordData[c.code].attendance=[false,false,false,false,false];
+          store.coordData[c.code].mtd_target_override=s.carry_mtd_target??null;
+          store.coordData[c.code].mtd_actual_override=s.carry_mtd_actual??null;
+          store.coordData[c.code].qtd_target_override=s.carry_qtd_target??null;
+          store.coordData[c.code].qtd_actual_override=s.carry_qtd_actual??null;
+          store.coordData[c.code].fpy_submitted=s.fpy_submitted||0;
+          store.coordData[c.code].fpy_rejected=s.fpy_rejected||0;
+          store.coordData[c.code].call=s.call||0;
+          store.coordData[c.code].supervisor=0;
+          if(s.on)store.coordData[c.code].on={...s.on};
+        });
+        if(p.fnToggles)FNS.forEach(fn=>{if(p.fnToggles[fn])Object.assign(store.fnToggles[fn],p.fnToggles[fn]);});
+        selectedWW=CURRENT_WW;
+      }
+      if(p.coordActive){Object.keys(p.coordActive).forEach(code=>{if(coordActive.hasOwnProperty(code))coordActive[code]=p.coordActive[code];});}
+      if(p.coordFn){Object.keys(p.coordFn).forEach(code=>{coordFn[code]=p.coordFn[code];});}
+      updateWWUI();buildToggles();buildForm();
+      showSt(`✓ Imported successfully`,true);
+    }catch(err){showSt(`✗ Import failed: ${err.message}`,false);}
+    event.target.value='';
+  };reader.readAsText(file);
+}
+
+function showSt(msg,ok){
+  const el=document.getElementById('import-status');
+  el.textContent=msg;el.className=`import-status ${ok?'import-ok':'import-err'}`;
+  el.style.display='inline-block';setTimeout(()=>{el.style.display='none';},5000);
+}
+function confirmClear(){
+  document.getElementById('clear-ww-label').textContent=`WW${selectedWW} (${getWWDateRange(selectedWW)})`;
+  document.getElementById('clear-modal').classList.add('show');
+}
+function closeModal(){document.getElementById('clear-modal').classList.remove('show');}
+function clearWeekData(){
+  weekStore[selectedWW]={coordData:emptyCoordData(selectedWW),fnToggles:emptyFnToggles()};
+  closeModal();buildToggles();buildForm();
+  showSt(`✓ WW${selectedWW} data reset`,true);
+}
+
+// ── PERIOD ────────────────────────────────────────────────────────────
+function setPeriod(p,btn){
+  cp=p;document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');buildForm();
+  if(document.getElementById('tab-leaderboard').style.display!=='none')renderLB();
+}
+
+// ── FN TABS ───────────────────────────────────────────────────────────
+function buildFnTabs(){
+  document.getElementById('fn-tabs').innerHTML=FNS.map(fn=>
+    `<button class="e-tab${fn===cft?' active':''}" onclick="switchFn('${fn}',this)">${fn}</button>`
+  ).join('');
+}
+function switchFn(fn,btn){
+  cft=fn;document.querySelectorAll('.e-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');buildToggles();buildForm();
+}
+
+// ── TOGGLES ───────────────────────────────────────────────────────────
+function buildToggles(){
+  const fn=cft,ft=activeFnt()[fn],w=getW(fn,false,null);
+  document.getElementById('fn-toggles').innerHTML=
+    `<span style="font-size:11px;font-weight:600;color:#555;margin-right:4px;">Team toggles:</span>`+
+    METRICS.map(m=>{const on=ft[m],wv=w[m]!==null?w[m].toFixed(1)+'%':'—';
+      return`<label class="toggle-item ${on?'mon':'moff'}">
+        <input type="checkbox" ${on?'checked':''} onchange="togFn('${fn}','${m}',this.checked)">
+        ${ML[m]}<span class="weight-pill ${on?'wp-on':'wp-off'}">${wv}</span></label>`;
+    }).join('');
+}
+function togFn(fn,m,v){
+  activeFnt()[fn][m]=v;buildToggles();buildForm();
+  if(document.getElementById('tab-weights').style.display!=='none')renderWT();
+}
+
+// ── COORD METRIC TOGGLE ───────────────────────────────────────────────
+function toggleCoordMetric(code,metric){
+  activeData()[code].on[metric]=!activeData()[code].on[metric];
+  const pill=document.getElementById(`pill-${code}-${metric}`);
+  if(pill){
+    const on=activeData()[code].on[metric];
+    pill.className=`metric-pill ${on?'pill-on':'pill-off'}`;
+  }
+  rxOv(code);
+}
+
+// ── PRIOR WEEKS COLLAPSE ──────────────────────────────────────────────
+function togglePrior(code){
+  const arrow=document.getElementById(`pa-${code}`),sec=document.getElementById(`ps-${code}`);
+  if(!arrow||!sec)return;
+  const open=sec.classList.toggle('open');
+  arrow.style.transform=open?'rotate(90deg)':'rotate(0deg)';
+}
+
+// ── ENTRY FORM ────────────────────────────────────────────────────────
+function buildForm(){
+  const fn=cft,ft=activeFnt()[fn];
+  const coords=COORDS.filter(c=>getCoordFn(c.code)===fn);
+  const todayIdx=getDayIdxForSelectedWW(selectedWW);
+  const elapsed=Math.max(0,todayIdx)+1;
+  const readonly=isReadonlyWW(selectedWW);
+  const future=isFutureWW(selectedWW);
+  const active=coords.filter(c=>!c.isTrainee&&coordActive[c.code]!==false),trainees=coords.filter(c=>c.isTrainee&&coordActive[c.code]!==false);
+  const inactive=coords.filter(c=>coordActive[c.code]===false);
+
+  const mkCard=c=>{
+    const d=activeData()[c.code],noOut=!c.dailyTarget&&!d.targets.some(t=>parseFloat(t)>0);
+    const oS=noOut?null:getOS(c.code,cp);
+    const fS=getFPY(c.code),aS=getAtt(c.code,cp),cS=getCall(c.code),sS=parseFloat(d.supervisor)||0;
+    const isOver=false,ov=getOv(c.code,cp),col=sc(ov);
+    let wT=0,wA=0;for(let i=0;i<elapsed;i++){wT+=parseFloat(d.targets[i])||0;wA+=parseFloat(d.actuals[i])||0;}
+    const badges=[];
+    if(c.isSup)badges.push('<span class="badge badge-sup">SUP</span>');
+    if(c.ncg)badges.push('<span class="badge badge-ncg">NCG</span>');
+    if(c.isTrainee)badges.push('<span class="badge badge-trainee">Trainee</span>');
+    const ws=getW(c.fn,c.isTrainee,c.code);
+    const wsStr=METRICS.filter(m=>ws[m]!==null).map(m=>`${m.slice(0,3).toUpperCase()} ${ws[m].toFixed(0)}%`).join(' · ');
+    const allowedMetrics=METRICS.filter(m=>ft[m]);
+    const pills=allowedMetrics.map(m=>{
+      const on=d.on[m];
+      const disabled=readonly||future;
+      const pillOnclick=disabled?'':('toggleCoordMetric(\''+c.code+'\',\''+m+'\')');
+      const pillStyle=disabled?'cursor:not-allowed;opacity:.6;':'';
+      const pillTitle=on?'Click to exclude from score':'Click to include in score';
+      return`<span id="pill-${c.code}-${m}" class="metric-pill ${on?'pill-on':'pill-off'}"
+        onclick="${pillOnclick}"
+        style="${pillStyle}"
+        title="${pillTitle}">
+        ${on?'✓':'✗'} ${ML[m]}
+      </span>`;
+    }).join('');
+
+    let h=`<div class="coord-card">
+      <div class="coord-card-hdr">
+        <span style="font-weight:600;font-size:13px;">${c.code}</span>${badges.join('')}
+        <span style="font-size:12px;color:#555;">${c.name}</span>
+        <span style="font-size:10px;color:#aaa;">Daily target: ${getDailyTarget(c.code,selectedWW)||'—'}</span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+          <label style="font-size:9px;color:#aaa;">Team:</label>
+          <select onchange="reassignCoord('${c.code}',this.value)" style="font-size:10px;padding:2px 6px;border:1px solid #e0e0e0;border-radius:4px;background:#fff;color:#555;cursor:pointer;" title="Reassign to another function">
+            ${['Funding','Licensing','Permitting','HOA','Utilities','Safety','Roofing'].map(f=>'<option value="'+f+'" '+(getCoordFn(c.code)===f?'selected':'')+'>'+f+'</option>').join('')}
+          </select>
+          <button onclick="toggleCoordActive('${c.code}')" style="font-size:10px;padding:2px 10px;border:1px solid #e0e0e0;border-radius:4px;background:#fff;color:#aaa;cursor:pointer;" title="Hide from leaderboard (data preserved)">Hide</button>
+        </div>
+      </div>
+      <div class="coord-card-body">`;
+
+    // OUTPUT
+    if(!noOut&&ft.output){
+      h+=`<div><div class="mlabel" style="margin-bottom:6px;">📦 Output
+        ${oS!==null?`<span class="score-badge ${sb(oS)}">${oS.toFixed(1)}%</span>`:''}
+        <span style="font-size:10px;color:#aaa;margin-left:6px;">WTD: ${wA.toFixed(1)} / ${wT.toFixed(1)}</span>
+      </div><div class="output-grid">`;
+      DAYS.forEach((day,i)=>{
+        const lk=isLockedForWW(i,selectedWW)||readonly||future;
+        const isTd=i===todayIdx&&!readonly&&!future;
+        const isPast=i<todayIdx||(readonly&&!future);
+        let lblClass=lk?'locked':(isTd?'today':'past');
+        let lblSuffix=lk?' 🔒':(isTd?' ●':' ✓');
+        if(future){lblClass='future-ww';lblSuffix='';}
+        h+=`<div class="day-cell">
+          <div class="day-lbl ${lblClass}">${day}${lblSuffix}</div>
+          <input class="metric-input tfield${lk?' locked':''}" type="number" min="0" step="0.1" id="tgt-${c.code}-${i}" value="${d.targets[i]}" style="width:52px;" ${lk?'disabled':''} placeholder="Tgt" oninput="activeData()['${c.code}'].targets[${i}]=parseFloat(this.value)||0;rxOv('${c.code}');">
+          <input class="metric-input${lk?' locked':''}" type="number" min="0" step="0.1" id="act-${c.code}-${i}" value="${d.actuals[i]}" style="width:52px;" ${lk?'disabled':''} placeholder="Act" oninput="activeData()['${c.code}'].actuals[${i}]=parseFloat(this.value)||0;rxOv('${c.code}');">
+        </div>`;
+      });
+      h+=`</div></div>`;
+    } else if(!ft.output){
+      h+=`<div><div class="mlabel off">📦 Output <span class="chip-off">off</span></div></div>`;
+    }
+
+    // ATTENDANCE
+    h+=`<div><div class="mlabel${!ft.attendance?' off':''}" style="margin-bottom:6px;">📅 Attendance
+      ${ft.attendance?`<span class="score-badge ${sb(aS)}" id="as-${c.code}">${aS.toFixed(0)}%</span>`:'<span class="chip-off">off</span>'}
+    </div><div class="attend-grid">`;
+    DAYS.forEach((day,i)=>{
+      const lk=isLockedForWW(i,selectedWW)||readonly||future;
+      const isTd=i===todayIdx&&!readonly&&!future;
+      h+=`<div class="attend-day${lk?' lkd':''}">
+        <span>${day}${lk&&!future?' 🔒':isTd?' ●':lk?'':' ✓'}</span>
+        <input type="checkbox" id="att-${c.code}-${i}" ${d.attendance[i]?'checked':''} ${lk?'disabled':''} onchange="activeData()['${c.code}'].attendance[${i}]=this.checked;rxAtt('${c.code}');">
+      </div>`;
+    });
+    h+=`</div></div>`;
+
+    // OTHER METRICS
+    h+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">`;
+    const rdis=readonly||future;
+
+    // FPY
+    h+=`<div><div class="mlabel${!ft.fpy?' off':''}">🎯 FPY
+      ${ft.fpy&&fS!==null?`<span class="score-badge ${sb(fS)}" id="fs-${c.code}">${fS.toFixed(1)}%</span>`:''}
+      ${!ft.fpy?'<span class="chip-off">off</span>':''}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:5px;">
+      <div style="display:flex;flex-direction:column;gap:3px;">
+        <span style="font-size:9px;color:#aaa;font-weight:500;">Submitted</span>
+        <input class="metric-input${!ft.fpy||!d.on.fpy?' moff':''}${rdis?' locked':''}" type="number" min="0" step="1" id="fs-sub-${c.code}" value="${d.fpy_submitted}" style="width:62px;" ${rdis?'disabled':''} oninput="activeData()['${c.code}'].fpy_submitted=parseFloat(this.value)||0;rxFPY('${c.code}');">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px;">
+        <span style="font-size:9px;color:#aaa;font-weight:500;">Rejected</span>
+        <input class="metric-input${!ft.fpy||!d.on.fpy?' moff':''}${rdis?' locked':''}" type="number" min="0" step="1" id="fs-rej-${c.code}" value="${d.fpy_rejected}" style="width:62px;" ${rdis?'disabled':''} oninput="activeData()['${c.code}'].fpy_rejected=parseFloat(this.value)||0;rxFPY('${c.code}');">
+      </div>
+    </div>
+    </div>`;
+
+    // Call
+    h+=`<div><div class="mlabel${!ft.call?' off':''}">📞 Call Answer Rate
+      ${ft.call?`<span class="score-badge ${sb(cS)}">${cS.toFixed(1)}%</span>`:'<span class="chip-off">off</span>'}
+      <span style="font-size:9px;color:#aaa;">(tgt 95%)</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:5px;margin-top:5px;">
+      <input class="metric-input${!ft.call||!d.on.call?' moff':''}${rdis?' locked':''}" type="number" min="0" max="200" step="0.1" id="call-${c.code}" value="${d.call}" style="width:72px;" ${rdis?'disabled':''} oninput="activeData()['${c.code}'].call=parseFloat(this.value)||0;rxOv('${c.code}');">
+      <span style="font-size:10px;color:#aaa;">%</span>
+    </div>
+    </div>`;
+
+    // Supervisor
+    h+=`<div><div class="mlabel${!ft.supervisor?' off':''}">✅ Supervisor Tasks
+      ${ft.supervisor?`<span class="score-badge ${sb(sS)}">${sS.toFixed(1)}%</span>`:'<span class="chip-off">off</span>'}
+    </div>
+    <div style="display:flex;align-items:center;gap:5px;margin-top:5px;">
+      <input class="metric-input${!ft.supervisor?' moff':''}${rdis?' locked':''}" type="number" min="0" max="100" step="0.1" id="supervisor-${c.code}" value="${d.supervisor}" style="width:72px;" ${rdis?'disabled':''} placeholder="0–100" oninput="activeData()['${c.code}'].supervisor=parseFloat(this.value)||0;rxOv('${c.code}');">
+      <span style="font-size:10px;color:#aaa;">%</span>
+    </div>
+    </div>`;
+
+    h+=`</div>`;
+
+    // METRIC PILLS
+    h+=`<div class="coord-metric-toggles">
+      <span class="coord-metric-toggles-label">Individual metric inclusion:</span>
+      ${pills}
+    </div>`;
+
+    // PRIOR WEEKS
+    if(!noOut){
+      h+=`<div style="border-top:1px solid #f0f0f0;padding-top:4px;">
+        <button class="prior-btn" onclick="togglePrior('${c.code}')">
+          <span id="pa-${c.code}" class="prior-arrow">▶</span>
+          &nbsp;Prior weeks data (MTD / QTD override)
+          <span style="font-size:9px;color:#bbb;margin-left:6px;">— expand only if entering data from weeks not yet tracked</span>
+        </button>
+        <div class="prior-section" id="ps-${c.code}">
+          <div class="prior-grid">
+            <div class="prior-field"><label>MTD Target</label>
+              <input class="metric-input tfield${rdis?' locked':''}" type="number" min="0" step="0.1" id="mt-${c.code}" value="${d.mtd_target_override!==null?d.mtd_target_override:''}" placeholder="${wT.toFixed(0)}" ${rdis?'disabled':''} oninput="activeData()['${c.code}'].mtd_target_override=this.value!==''?parseFloat(this.value):null;rxOv('${c.code}');">
+            </div>
+            <div class="prior-field"><label>MTD Actual</label>
+              <input class="metric-input${rdis?' locked':''}" type="number" min="0" step="0.1" id="ma-${c.code}" value="${d.mtd_actual_override!==null?d.mtd_actual_override:''}" placeholder="${wA.toFixed(0)}" ${rdis?'disabled':''} oninput="activeData()['${c.code}'].mtd_actual_override=this.value!==''?parseFloat(this.value):null;rxOv('${c.code}');">
+            </div>
+            <div class="prior-field"><label>QTD Target</label>
+              <input class="metric-input tfield${rdis?' locked':''}" type="number" min="0" step="0.1" id="qt-${c.code}" value="${d.qtd_target_override!==null?d.qtd_target_override:''}" placeholder="${wT.toFixed(0)}" ${rdis?'disabled':''} oninput="activeData()['${c.code}'].qtd_target_override=this.value!==''?parseFloat(this.value):null;rxOv('${c.code}');">
+            </div>
+            <div class="prior-field"><label>QTD Actual</label>
+              <input class="metric-input${rdis?' locked':''}" type="number" min="0" step="0.1" id="qa-${c.code}" value="${d.qtd_actual_override!==null?d.qtd_actual_override:''}" placeholder="${wA.toFixed(0)}" ${rdis?'disabled':''} oninput="activeData()['${c.code}'].qtd_actual_override=this.value!==''?parseFloat(this.value):null;rxOv('${c.code}');">
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // OVERALL
+    h+=`<div class="overall-row">
+      <span style="font-size:11px;color:#666;">Overall (${cp.toUpperCase()}):</span>
+      <span id="ov-${c.code}" style="font-size:16px;font-weight:700;color:${col};">${ov.toFixed(1)}%</span>
+      <div class="score-bar-wrap" style="width:90px;"><div class="score-bar" style="width:${Math.min(ov,100)}%;background:${col};"></div></div>
+      <span style="font-size:10px;color:#aaa;margin-left:auto;">${wsStr}</span>
+    </div>`;
+    h+=`</div></div>`;return h;
+  };
+
+  let html='';
+  if(active.length)html+=active.map(mkCard).join('');
+  if(trainees.length){html+=`<div class="sec-div">Trainees — Attendance &amp; Supervisor Tasks only</div>`;html+=trainees.map(mkCard).join('');}
+    document.getElementById('entry-form').innerHTML=html;
+  buildHiddenPanel();
+}
+
+// ── REFRESH HELPERS ───────────────────────────────────────────────────
+function rxOv(code){
+  const c=COORDS.find(x=>x.code===code),ov=getOv(code,cp),el=document.getElementById(`ov-${code}`);
+  if(el){el.style.color=c.isTrainee?'#9ca3af':sc(ov);el.textContent=ov.toFixed(1)+'%';}
+}
+function rxAtt(code){const s=getAtt(code,cp),el=document.getElementById(`as-${code}`);if(el)el.textContent=s.toFixed(0)+'%';rxOv(code);}
+function rxFPY(code){const s=getFPY(code),el=document.getElementById(`fs-${code}`);if(el&&s!==null)el.textContent=s.toFixed(1)+'%';rxOv(code);}
+
+// ── LEADERBOARD ───────────────────────────────────────────────────────
+function cdis(code,metric){
+  const c=COORDS.find(x=>x.code===code),w=getW(getCoordFn(code),c.isTrainee,code);
+  if(w[metric]===null)return'<span class="chip-off">off</span>';
+  if(metric==='output'){const s=getOS(code,cp);if(s===null)return'—';return s.toFixed(1)+'%';}
+  if(metric==='fpy'){const s=getFPY(code);return s!==null?s.toFixed(1)+'%':'—';}
+  if(metric==='attendance')return getAtt(code,cp).toFixed(0)+'%';
+  if(metric==='call')return getCall(code).toFixed(1)+'%';
+  if(metric==='supervisor')return(parseFloat(activeData()[code].supervisor)||0).toFixed(1)+'%';
+  return'—';
+}
+function updateLeaderboard(){collectDOM();switchTab('leaderboard',document.querySelectorAll('.tab')[1]);}
+function renderLB(){
+  let rd=COORDS.filter(c=>coordActive[c.code]!==false).map(c=>({...c,fn:getCoordFn(c.code),overall:getOv(c.code,cp)}));
+  if(cf!=='ALL')rd=rd.filter(d=>d.fn===cf);
+  const ranked=rd.filter(d=>!d.isTrainee),unranked=rd.filter(d=>d.isTrainee);
+  ranked.sort((a,b)=>{
+    if(cs==='name') return csd*(a.name.localeCompare(b.name));
+    if(cs==='fn')   return csd*(a.fn.localeCompare(b.fn));
+    // Default: 1) score desc, 2) team name asc, 3) first name asc
+    const scoreDiff=b.overall-a.overall;
+    if(scoreDiff!==0) return csd*scoreDiff;
+    const fnDiff=a.fn.localeCompare(b.fn);
+    if(fnDiff!==0) return fnDiff;
+    const aFirst=a.name.split(' ')[0], bFirst=b.name.split(' ')[0];
+    return aFirst.localeCompare(bFirst);
+  });
+  const mkR=(d,rank,isTraineeRank=false)=>{
+    const iR=rank!==null,ov=d.overall,col=isTraineeRank?sc(ov):(!iR?'#9ca3af':sc(ov)),bw=Math.min(ov,100);
+    const rCls=isTraineeRank?(rank===1?'r1':rank===2?'r2':rank===3?'r3':'rn'):(rank===1?'r1':rank===2?'r2':rank===3?'r3':'rn');
+    const badges=[];
+    if(d.isSup)badges.push('<span class="badge badge-sup">SUP</span>');
+    if(d.ncg)badges.push('<span class="badge badge-ncg">NCG</span>');
+    if(d.isTrainee)badges.push('<span class="badge badge-trainee">Trainee</span>');
+    return`<tr class="${rank&&rank<=3?'top3':''}">
+      <td><div class="rank-badge ${iR?rCls:'rn'}">${rank||'—'}</div></td>
+      <td><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;"><span style="font-weight:600;">${d.code}</span>${badges.join('')}</div><div style="font-size:11px;color:#666;">${d.name}</div></td>
+      <td><span class="fn-label fn-${d.fn}">${d.fn}</span></td>
+      <td style="text-align:center;">${cdis(d.code,'output')}</td>
+      <td style="text-align:center;">${cdis(d.code,'fpy')}</td>
+      <td style="text-align:center;">${cdis(d.code,'call')}</td>
+      <td style="text-align:center;">${cdis(d.code,'attendance')}</td>
+      <td style="text-align:center;">${cdis(d.code,'supervisor')}</td>
+      <td><span style="font-weight:600;font-size:13px;color:${col};">${ov.toFixed(1)}%</span></td>
+      <td><div class="score-bar-wrap" style="width:64px;"><div class="score-bar" style="width:${iR?bw:0}%;background:${col};"></div></div></td>
+    </tr>`;
+  };
+  let rows=ranked.map((d,i)=>mkR(d,i+1));
+  if(unranked.length){
+    // Sort trainees by overall score descending
+    unranked.sort((a,b)=>{
+      const scoreDiff=b.overall-a.overall;
+      if(scoreDiff!==0) return scoreDiff;
+      const fnDiff=a.fn.localeCompare(b.fn);
+      if(fnDiff!==0) return fnDiff;
+      const aFirst=a.name.split(' ')[0], bFirst=b.name.split(' ')[0];
+      return aFirst.localeCompare(bFirst);
+    });
+    rows.push(`<tr><td colspan="10" style="font-size:10px;font-weight:600;color:#5b21b6;padding:6px 9px;background:#f5f3ff;border-top:2px solid #e0e0e0;letter-spacing:.3px;">TRAINEES</td></tr>`);
+    rows=rows.concat(unranked.map((d,i)=>mkR(d,i+1,true)));
+  }
+  document.getElementById('lb-body').innerHTML=rows.join('');
+}
+function filterFn(fn,btn){cf=fn;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderLB();}
+function sortBy(col){if(cs===col)csd*=-1;else{cs=col;csd=1;}renderLB();}
+
+// ── WEIGHT CONFIG ─────────────────────────────────────────────────────
+function renderWT(){
+  const rows=FNS.map(fn=>{
+    const w=getW(fn,false,null),fmt=v=>v===null?'<span class="chip-off">off</span>':`<strong>${v.toFixed(1)}%</strong>`;
+    const tot=Object.values(w).filter(v=>v!==null).reduce((s,v)=>s+v,0);
+    return`<tr><td><span class="fn-label fn-${fn}">${fn}</span></td><td>${fmt(w.output)}</td><td>${fmt(w.fpy)}</td><td>${fmt(w.call)}</td><td>${fmt(w.attendance)}</td><td>${fmt(w.supervisor)}</td><td><strong style="color:#059669;">${tot.toFixed(1)}%</strong></td></tr>`;
+  });
+  rows.push(`<tr style="background:#fafafa;"><td><span class="badge badge-trainee">Trainee</span> <span style="font-size:9px;color:#aaa;">(default)</span></td><td><span class="chip-off">off</span></td><td><span class="chip-off">off</span></td><td><span class="chip-off">off</span></td><td><strong>50.0%</strong></td><td><strong>50.0%</strong></td><td><strong style="color:#059669;">100.0%</strong> <span style="font-size:9px;color:#aaa;">until metrics enabled</span></td></tr>`);
+  document.getElementById('wt-body').innerHTML=rows.join('');
+}
+
+// ── TAB SWITCHER ──────────────────────────────────────────────────────
+function switchTab(tab,btn){
+  ['entry','leaderboard','weights'].forEach(t=>{document.getElementById('tab-'+t).style.display=t===tab?'block':'none';});
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  if(tab==='leaderboard')renderLB();
+  if(tab==='weights')renderWT();
+}
+
+// ── HIDDEN PANEL ─────────────────────────────────────────────────────
+function buildHiddenPanel(){
+  const hiddenAll=COORDS.filter(c=>coordActive[c.code]===false);
+  const panel=document.getElementById('hidden-panel');
+  if(!panel) return;
+  if(!hiddenAll.length){panel.innerHTML='';return;}
+  panel.innerHTML=`<div style="margin-top:1rem;border:1px dashed #e0e0e0;border-radius:8px;overflow:hidden;">
+    <div style="padding:8px 14px;background:#fafafa;display:flex;align-items:center;gap:8px;cursor:pointer;"
+      onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.ia-arrow').style.transform=this.nextElementSibling.style.display==='block'?'rotate(90deg)':'rotate(0deg)'">
+      <span class="ia-arrow" style="font-size:9px;transition:transform .2s;display:inline-block;">▶</span>
+      <span style="font-size:11px;color:#aaa;font-weight:500;">Hidden coordinators (${hiddenAll.length}) — data preserved, excluded from leaderboard</span>
+    </div>
+    <div style="display:none;padding:10px 14px;">
+      ${hiddenAll.map(c=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f5f5f5;flex-wrap:wrap;">
+          <span style="font-weight:600;font-size:12px;color:#aaa;">${c.code}</span>
+          <span style="font-size:11px;color:#aaa;">${c.name}</span>
+          <span class="fn-label fn-${getCoordFn(c.code)}" style="opacity:.5;">${getCoordFn(c.code)}</span>
+          ${c.isTrainee?'<span class="badge badge-trainee">Trainee</span>':''}
+          <button onclick="toggleCoordActive('${c.code}')"
+            style="margin-left:auto;font-size:11px;padding:4px 12px;border:1px solid #c7d7f0;border-radius:5px;background:#f0f6ff;color:#1a56a0;cursor:pointer;font-weight:500;">
+            ↩ Restore
+          </button>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ── AUTO-SAVE / AUTO-RESTORE (localStorage) ──────────────────────────
+const LS_KEY='SPWR_LB_AUTOSAVE_v26';
+
+function autoSave(){
+  try{
+    collectDOM();
+    const payload={
+      version:'2.6',
+      savedAt:fmtMT(),
+      currentWW:selectedWW,
+      coordActive:{...coordActive},
+      coordFn:{...coordFn},
+      weeks:{}
+    };
+    Object.keys(weekStore).forEach(ww=>{
+      payload.weeks[ww]={
+        coordData:JSON.parse(JSON.stringify(weekStore[ww].coordData)),
+        fnToggles:JSON.parse(JSON.stringify(weekStore[ww].fnToggles)),
+      };
+    });
+    localStorage.setItem(LS_KEY, JSON.stringify(payload));
+  }catch(e){console.warn('Auto-save failed:',e);}
+}
+
+function autoRestore(){
+  try{
+    const raw=localStorage.getItem(LS_KEY);
+    if(!raw) return false;
+    const p=JSON.parse(raw);
+    if(!p.weeks) return false;
+    Object.keys(p.weeks).forEach(ww=>{
+      weekStore[parseInt(ww)]=p.weeks[ww];
+    });
+    if(p.coordActive) Object.keys(p.coordActive).forEach(code=>{
+      if(coordActive.hasOwnProperty(code)) coordActive[code]=p.coordActive[code];
+    });
+    if(p.coordFn) Object.keys(p.coordFn).forEach(code=>{coordFn[code]=p.coordFn[code];});
+    if(p.currentWW) selectedWW=p.currentWW;
+    console.log('Auto-restored from',p.savedAt);
+    return true;
+  }catch(e){console.warn('Auto-restore failed:',e);return false;}
+}
+
+function clearAutoSave(){
+  localStorage.removeItem(LS_KEY);
+  showSt('✓ Auto-save cleared',true);
+}
+
+// Auto-save on any input change — debounced 2s
+let autoSaveTimer=null;
+function scheduleAutoSave(){
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer=setTimeout(()=>{autoSave();const el=document.getElementById('autosave-indicator');if(el)el.textContent='💾 Auto-saved '+new Date().toLocaleTimeString('en-US',{timeZone:TZ,hour:'2-digit',minute:'2-digit'});},2000);
+}
+
+// Patch all data-mutating functions to trigger auto-save
+const _origToggleCoordActive=toggleCoordActive;
+window.toggleCoordActive=function(code){_origToggleCoordActive(code);scheduleAutoSave();};
+const _origReassignCoord=reassignCoord;
+window.reassignCoord=function(code,fn){_origReassignCoord(code,fn);scheduleAutoSave();};
+const _origTogFn=togFn;
+window.togFn=function(fn,m,v){_origTogFn(fn,m,v);scheduleAutoSave();};
+const _origToggleCoordMetric=toggleCoordMetric;
+window.toggleCoordMetric=function(code,metric){_origToggleCoordMetric(code,metric);scheduleAutoSave();};
+
+// Patch oninput handlers — intercept via document event delegation
+document.addEventListener('input',()=>scheduleAutoSave());
+document.addEventListener('change',()=>scheduleAutoSave());
+
+// Save before tab/window closes
+window.addEventListener('beforeunload',()=>autoSave());
+
+// ── INIT ──────────────────────────────────────────────────────────────
+buildWWSelector();
+// Try to restore saved data first
+const restored=autoRestore();
+updateWWUI();
+buildFnTabs();
+buildToggles();
+buildForm();
+buildHiddenPanel();
+renderLB();
+// Apply view mode on load (from URL param or default edit)
+setViewMode(viewMode);
+// Update toggle button label
+const vmBtn=document.getElementById('view-mode-toggle');
+if(vmBtn) vmBtn.textContent=viewMode==='view'?'✏️ Edit Mode':'👁 View Mode';
+// Show restore notification
+if(restored){
+  setTimeout(()=>showSt('✓ Auto-restored your previous session data',true),500);
+}
+</script>
+</body>
+</html>
